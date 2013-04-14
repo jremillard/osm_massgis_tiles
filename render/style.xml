@@ -1,0 +1,94 @@
+
+
+<Map background-color="black" >
+
+  <Style name="Boundary">
+    <Rule>
+      <LineSymbolizer stroke="rgb(100%,100%,100%)" stroke-width="1" />
+    </Rule>
+  </Style>
+
+  <Style name="Labels">
+    <Rule>
+      <Filter>[use_code] = '1010'</Filter> 
+       <TextSymbolizer 
+        face-name="DejaVu Sans Book" 
+        size="10" 
+        spacing="10"
+        fill="white" 
+        placement="line" 
+        allow-overlap="false">[address]
+      </TextSymbolizer>
+   </Rule>
+    <Rule>
+      <Filter>[use_code] != '1010'</Filter> 
+      <TextSymbolizer 
+        face-name="DejaVu Sans Book" 
+        size="10" 
+        spacing="10"
+        fill="white"
+        placement="line" 
+        allow-overlap="false">[owner_address]
+      </TextSymbolizer>
+   </Rule>
+
+  </Style>
+
+  <Layer name="Boundary">
+    <StyleName>Boundary</StyleName>
+
+    <Datasource>
+      <Parameter name="type">postgis</Parameter>
+      <Parameter name="dbname">gis</Parameter>
+      <Parameter name="srid">900913</Parameter>
+      <Parameter name="estimate_extent">false</Parameter>
+      <Parameter name="extent">-20037508,-19929239,20037508,19929239</Parameter>
+      <Parameter name="table">
+        (select 
+           the_geom, 
+           poly_type
+         from 
+           massgis_taxpar
+         where 
+           ST_isValid(the_geom) and
+           ST_Intersects(massgis_taxpar.the_geom,!bbox!)
+        ) as foo</Parameter>
+    </Datasource>
+ </Layer>
+
+  <Layer name="Labels">
+    <StyleName>Labels</StyleName>
+
+    <Datasource>
+      <Parameter name="type">postgis</Parameter>
+      <Parameter name="dbname">gis</Parameter>
+      <Parameter name="srid">900913</Parameter>
+      <Parameter name="estimate_extent">false</Parameter>
+      <Parameter name="geometry_field">the_geom</Parameter>
+      <Parameter name="extent">-20037508,-19929239,20037508,19929239</Parameter>
+      <Parameter name="table">
+        (select 
+           ST_Buffer( massgis_taxpar.the_geom,-15) as the_geom,
+           min(massgis_assessor.use_code) as use_code,
+           min(massgis_assessor.use_code) || ' - ' ||
+           min(massgis_assessor.owner1) || ' - ' || 
+           min(massgis_assessor.site_addr) as owner_address,
+           min(massgis_assessor.site_addr) as address
+         from 
+           massgis_taxpar, massgis_assessor
+         where 
+           ST_isValid(massgis_taxpar.the_geom) and
+           ST_Intersects(massgis_taxpar.the_geom,!bbox!) and
+           massgis_taxpar.loc_id = massgis_assessor.loc_id 
+         group by 
+           massgis_taxpar.the_geom) as foo
+        </Parameter>
+    </Datasource>
+
+  </Layer>
+
+
+ 
+
+
+</Map>
