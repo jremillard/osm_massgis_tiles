@@ -7,18 +7,19 @@
 
   <Style name="Outside Label">
     <Rule>
-      <Filter>[use_code] = '1010'</Filter> 
+      <Filter>[use_code] = '10'</Filter> 
        <TextSymbolizer 
         face-name="DejaVu Sans Book" 
         size="10" 
         spacing="10"
         fill="white" 
+        wrap-character="-"
         placement="line" 
         allow-overlap="true">[address]
       </TextSymbolizer>
    </Rule>
     <Rule>
-      <Filter>[use_code] != '1010'</Filter> 
+      <Filter>[use_code] != '10'</Filter> 
       <TextSymbolizer 
         face-name="DejaVu Sans Book" 
         size="10" 
@@ -32,15 +33,14 @@
 
   <Style name="Center Label">
     <Rule>
-      <Filter>[use_code] = '1010'</Filter> 
-       <TextSymbolizer 
+      <TextSymbolizer 
         face-name="DejaVu Sans Book" 
         size="10" 
         spacing="10"
         fill="white" 
-        allow-overlap="false">[address]
+        >[address]
       </TextSymbolizer>
-   </Rule>
+    </Rule>
   </Style>
 
   <Layer name="Boundary">
@@ -78,11 +78,12 @@
       <Parameter name="table">
         (select 
            ST_Buffer( massgis_taxpar.the_geom,-15) as the_geom,
-           min(massgis_assessor.use_code) as use_code,
-           min(massgis_assessor.use_code) || ' - ' ||
-           min(massgis_assessor.owner1) || ' - ' || 
-           min(massgis_assessor.site_addr) as owner_address,
-           min(massgis_assessor.site_addr) as address
+           min(substring(massgis_assessor.use_code,0,3)) as use_code,
+           min(massgis_assessor.owner1) || '-' || 
+             min(massgis_assessor.site_addr) || ' uc' ||
+             min(substring(massgis_assessor.use_code,0,4)) as owner_address,
+           min(massgis_assessor.site_addr) || ' uc' ||
+             min(substring(massgis_assessor.use_code,0,4)) as address
          from 
            massgis_taxpar, massgis_assessor
          where 
@@ -108,17 +109,14 @@
       <Parameter name="table">
         (select 
            ST_PointOnSurface( massgis_taxpar.the_geom) as the_geom,
-           min(massgis_assessor.use_code) as use_code,
-           min(massgis_assessor.use_code) || ' - ' ||
-           min(massgis_assessor.owner1) || ' - ' || 
-           min(massgis_assessor.site_addr) as owner_address,
-           min(massgis_assessor.site_addr) as address
+           min(addr_num) as address
          from 
            massgis_taxpar, massgis_assessor
          where 
            ST_isValid(massgis_taxpar.the_geom) and
            ST_Intersects(massgis_taxpar.the_geom,!bbox!) and
-           massgis_taxpar.loc_id = massgis_assessor.loc_id 
+           massgis_taxpar.loc_id = massgis_assessor.loc_id and 
+           addr_num != '0'
          group by 
            massgis_taxpar.the_geom) as foo
         </Parameter>
