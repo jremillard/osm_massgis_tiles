@@ -4,6 +4,7 @@
 
 import sys, os, zipfile, glob
 
+os.system("mkdir -p temp")
 os.system("rm loadparcel_log.txt");
 
 os.system("psql -q gis -f createschema.sql >> loadparcel_log.txt")
@@ -15,7 +16,7 @@ for file in glob.glob("../srcdata/massgis_parcels/*TaxPar.shp") :
   os.system("echo parcel " + file + " >> loadparcel_log.txt");
 
   # reproject to 900913, which is what we use inside of postGIS
-  os.system("ogr2ogr -t_srs EPSG:900913 -overwrite temp/temp.shp " + file + " >> loadparcel_log.txt")
+  os.system("ogr2ogr -t_srs EPSG:900913 temp/temp.shp " + file + " >> loadparcel_log.txt")
 
 
   if ( os.system("shp2pgsql -D -s 900913 -a temp/temp.shp massgis_taxpar > temp/massgis_taxpar.sql 2>> loadparcel_log.txt") or 
