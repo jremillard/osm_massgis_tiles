@@ -6,6 +6,17 @@
   </Style>
 
   <Style name="Outside Label">
+
+    <Rule>
+      <Filter>[use_code] = '90'</Filter> 
+      <PolygonSymbolizer fill="#43BF43" />
+    </Rule>
+    <Rule>
+      <Filter>[use_code] = '10'</Filter> 
+      <PolygonSymbolizer fill="#EBEBEB" />
+    </Rule>
+
+
     <Rule>
       <Filter>[use_code] = '10'</Filter> 
        <TextSymbolizer 
@@ -17,7 +28,7 @@
         placement="line" 
         allow-overlap="true">[address]
       </TextSymbolizer>
-   </Rule>
+    </Rule>
     <Rule>
       <Filter>[use_code] != '10'</Filter> 
       <TextSymbolizer 
@@ -33,14 +44,26 @@
 
   <Style name="Center Label">
     <Rule>
+      <Filter>[address_min] = [address_max]</Filter>
       <TextSymbolizer 
         face-name="DejaVu Sans Book" 
         size="10" 
         spacing="10"
         fill="white" 
-        >[address]
+        >[address_min]
       </TextSymbolizer>
     </Rule>
+    <Rule>
+      <Filter>[address_min] != [address_max]</Filter>
+      <TextSymbolizer 
+        face-name="DejaVu Sans Book" 
+        size="10" 
+        spacing="10"
+        fill="white" 
+        >[address_both]
+      </TextSymbolizer>
+    </Rule>
+
   </Style>
 
   <Layer name="Boundary">
@@ -54,8 +77,7 @@
       <Parameter name="extent">-20037508,-19929239,20037508,19929239</Parameter>
       <Parameter name="table">
         (select 
-           the_geom, 
-           poly_type
+           the_geom as the_geom
          from 
            massgis_taxpar
          where 
@@ -109,7 +131,9 @@
       <Parameter name="table">
         (select 
            ST_PointOnSurface( massgis_taxpar.the_geom) as the_geom,
-           min(addr_num) as address
+           min(addr_num) as address_min,
+           max(addr_num) as address_max,
+           min(addr_num) || '-' || max(addr_num) as address_both
          from 
            massgis_taxpar, massgis_assessor
          where 
