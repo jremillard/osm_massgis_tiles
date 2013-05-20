@@ -359,15 +359,18 @@ def convertMassGISTownNumbersToName( number) :
 
 def download():
   base = "http://wsgw.mass.gov/data/gispub/shape/l3parcels/L3_SHP_M"
+  dirname = "massgis_parcels"
+  if not os.path.exists(dirname):
+    os.makedirs(dirname)
   for i in range(1,352):
     url = base + "%03d_%s.zip" % (i,convertMassGISTownNumbersToName(i))
-    localname = "massgis_parcels/%s.zip" % convertMassGISTownNumbersToName(i)
+    localname = "%s/%s.zip" % (dirname, convertMassGISTownNumbersToName(i))
     print "downloading " + localname
     urllib.urlretrieve(url,localname)
     st=os.stat(localname)
     if st.st_size>0:
       print "unzip " + localname
-      os.system("unzip -d massgis_parcels/ -j " + localname);
+      os.system(("unzip -d %s/ -j " % dirname) + localname);
     os.remove(localname)
 
 download()

@@ -1,21 +1,13 @@
-<Map background-color="black" >
+<Map background-color="transparent" >
+
   <Style name="Boundary">
     <Rule>
-      <LineSymbolizer stroke="rgb(100%,100%,100%)" stroke-width="1" />
+      <LineSymbolizer stroke="black" stroke-width="3" />
+      <LineSymbolizer stroke="white" stroke-width="1" />
     </Rule>
   </Style>
 
   <Style name="Outside Label">
-
-    <Rule>
-      <Filter>[use_code] = '90'</Filter> 
-      <PolygonSymbolizer fill="#43BF43" />
-    </Rule>
-    <Rule>
-      <Filter>[use_code] = '10'</Filter> 
-      <PolygonSymbolizer fill="#EBEBEB" />
-    </Rule>
-
 
     <Rule>
       <Filter>[use_code] = '10'</Filter> 
@@ -24,6 +16,8 @@
         size="10" 
         spacing="10"
         fill="white" 
+        halo-fill="black"
+        halo-radius="2"
         wrap-character="-"
         placement="line" 
         allow-overlap="true">[address]
@@ -36,6 +30,8 @@
         size="10" 
         spacing="10"
         fill="white"
+        halo-fill="black"
+        halo-radius="2"
         placement="line" 
         allow-overlap="true">[owner_address]
       </TextSymbolizer>
@@ -50,6 +46,8 @@
         size="10" 
         spacing="10"
         fill="white" 
+        halo-fill="black"
+        halo-radius="2"
         >[address_min]
       </TextSymbolizer>
     </Rule>
@@ -60,6 +58,8 @@
         size="10" 
         spacing="10"
         fill="white" 
+        halo-fill="black"
+        halo-radius="2"
         >[address_both]
       </TextSymbolizer>
     </Rule>
