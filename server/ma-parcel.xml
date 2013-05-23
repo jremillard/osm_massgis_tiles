@@ -1,3 +1,5 @@
+<!DOCTYPE Map[<!ENTITY dbparams SYSTEM "db.inc"> ]>
+
 <Map background-color="transparent" >
 
   <Style name="Boundary">
@@ -71,7 +73,7 @@
 
     <Datasource>
       <Parameter name="type">postgis</Parameter>
-      <Parameter name="dbname">gis</Parameter>
+       &dbparams;
       <Parameter name="srid">900913</Parameter>
       <Parameter name="estimate_extent">false</Parameter>
       <Parameter name="extent">-20037508,-19929239,20037508,19929239</Parameter>
@@ -92,7 +94,7 @@
 
     <Datasource>
       <Parameter name="type">postgis</Parameter>
-      <Parameter name="dbname">gis</Parameter>
+       &dbparams;
       <Parameter name="srid">900913</Parameter>
       <Parameter name="estimate_extent">false</Parameter>
       <Parameter name="geometry_field">the_geom</Parameter>
@@ -123,7 +125,7 @@
 
     <Datasource>
       <Parameter name="type">postgis</Parameter>
-      <Parameter name="dbname">gis</Parameter>
+       &dbparams;
       <Parameter name="srid">900913</Parameter>
       <Parameter name="estimate_extent">false</Parameter>
       <Parameter name="geometry_field">the_geom</Parameter>

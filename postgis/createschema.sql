@@ -10,8 +10,8 @@ DROP INDEX if exists massgis_assessor_loc_id;
 BEGIN;
 
 CREATE TABLE massgis_taxpar (gid serial PRIMARY KEY,
-shape_leng numeric,
-shape_area numeric,
+shape_leng double precision,
+shape_area double precision,
 map_par_id text,
 loc_id text,
 poly_type text,
@@ -22,7 +22,7 @@ last_edit int4,
 bnd_chk text,
 no_match text,
 town_id int2,
-/* The following are extra fields that are in just one towns files  */
+/* The following are extra fields that are in just one town files  */
 loc_id_isl text,
 objectid text,
 poly__desc text,
@@ -41,7 +41,7 @@ CREATE TABLE "massgis_assessor" (gid serial PRIMARY KEY,
 "other_val" int4,
 "total_val" int4,
 "fy" int2,
-"lot_size" numeric,
+"lot_size" double precision,
 "ls_date" text,
 "ls_price" int4,
 "use_code" text,
