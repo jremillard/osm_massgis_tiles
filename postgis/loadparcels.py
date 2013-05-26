@@ -4,7 +4,7 @@
 
 import sys, os, glob
 
-database = "gis2"
+database = "gis"
 logfile = "loadparcels_log.txt"
 
 # supply database name on command line if not gis
@@ -33,7 +33,7 @@ for file in glob.glob("../srcdata/massgis_parcels/*Assess.dbf") :
   os.system("echo assessor " + file + " >> " + logfile);
 
   # convert assessor (aka address data) to sql and load
-  if ( os.system("shp2pgsql -D -n -a " + file + " massgis_assessor > temp/assessor.sql 2>> " + logfile)) :
+  if ( os.system("shp2pgsql -W \"latin1\" -D -n -a " + file + " massgis_assessor > temp/assessor.sql 2>> " + logfile)) :
     print "assessor convert to sql " + file + " FAIL"
   elif (os.system("psql -q " + database + " -f temp/assessor.sql >> " + logfile)) :
     print "assessor load into pgsql " + file + " FAIL"
