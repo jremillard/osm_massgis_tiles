@@ -1,6 +1,6 @@
 # script to download updated L3 parcel data from the MassGIS website.
 
-import urllib,os,zipfile,glob
+import urllib,os,zipfile,glob, shutil
 
 def convertMassGISTownNumbersToName( number) :
 
@@ -86,9 +86,9 @@ def convertMassGISTownNumbersToName( number) :
   ('80','DUDLEY'),
   ('81','DUNSTABLE'),
   ('82','DUXBURY'),
-  ('83','EAST_BRIDGEWATER'),
-  ('84','EAST_BROOKFIELD'),
-  ('85','EAST_LONGMEADOW'),
+  ('83','EASTBRIDGEWATER'),
+  ('84','EASTBROOKFIELD'),
+  ('85','EASTLONGMEADOW'),
   ('86','EASTHAM'),
   ('87','EASTHAMPTON'),
   ('88','EASTON'),
@@ -98,7 +98,7 @@ def convertMassGISTownNumbersToName( number) :
   ('92','ESSEX'),
   ('93','EVERETT'),
   ('94','FAIRHAVEN'),
-  ('95','FALL_RIVER'),
+  ('95','FALLRIVER'),
   ('96','FALMOUTH'),
   ('97','FITCHBURG'),
   ('98','FLORIDA'),
@@ -107,7 +107,7 @@ def convertMassGISTownNumbersToName( number) :
   ('101','FRANKLIN'),
   ('102','FREETOWN'),
   ('103','GARDNER'),
-  ('104','GAY_HEAD'),
+  ('104','GAYHEAD'),
   ('105','GEORGETOWN'),
   ('106','GILL'),
   ('107','GLOUCESTER'),
@@ -116,7 +116,7 @@ def convertMassGISTownNumbersToName( number) :
   ('110','GRAFTON'),
   ('111','GRANBY'),
   ('112','GRANVILLE'),
-  ('113','GREAT_BARRINGTON'),
+  ('113','GREATBARRINGTON'),
   ('114','GREENFIELD'),
   ('115','GROTON'),
   ('116','GROVELAND'),
@@ -198,25 +198,25 @@ def convertMassGISTownNumbersToName( number) :
   ('192','MONTAGUE'),
   ('193','MONTEREY'),
   ('194','MONTGOMERY'),
-  ('195','MOUNT_WASHINGTON'),
+  ('195','MOUNTWASHINGTON'),
   ('196','NAHANT'),
   ('197','NANTUCKET'),
   ('198','NATICK'),
   ('199','NEEDHAM'),
-  ('200','NEW_ASHFORD'),
-  ('201','NEW_BEDFORD'),
-  ('202','NEW_BRAINTREE'),
-  ('203','NEW_MARLBOROUGH'),
-  ('204','NEW_SALEM'),
+  ('200','NEWASHFORD'),
+  ('201','NEWBEDFORD'),
+  ('202','NEWBRAINTREE'),
+  ('203','NEWMARLBOROUGH'),
+  ('204','NEWSALEM'),
   ('205','NEWBURY'),
   ('206','NEWBURYPORT'),
   ('207','NEWTON'),
   ('208','NORFOLK'),
-  ('209','NORTH_ADAMS'),
-  ('210','NORTH_ANDOVER'),
-  ('211','NORTH_ATTLEBOROUGH'),
-  ('212','NORTH_BROOKFIELD'),
-  ('213','NORTH_READING'),
+  ('209','NORTHADAMS'),
+  ('210','NORTHANDOVER'),
+  ('211','NORTHATTLEBOROUGH'),
+  ('212','NORTHBROOKFIELD'),
+  ('213','NORTHREADING'),
   ('214','NORTHAMPTON'),
   ('215','NORTHBOROUGH'),
   ('216','NORTHBRIDGE'),
@@ -224,7 +224,7 @@ def convertMassGISTownNumbersToName( number) :
   ('218','NORTON'),
   ('219','NORWELL'),
   ('220','NORWOOD'),
-  ('221','OAK_BLUFFS'),
+  ('221','OAKBLUFFS'),
   ('222','OAKHAM'),
   ('223','ORANGE'),
   ('224','ORLEANS'),
@@ -265,7 +265,7 @@ def convertMassGISTownNumbersToName( number) :
   ('259','SALISBURY'),
   ('260','SANDISFIELD'),
   ('261','SANDWICH'),
-  ('262','SAUGU'),
+  ('262','SAUGUS'),
   ('263','SAVOY'),
   ('264','SCITUATE'),
   ('265','SEEKONK'),
@@ -278,7 +278,7 @@ def convertMassGISTownNumbersToName( number) :
   ('272','SHUTESBURY'),
   ('273','SOMERSET'),
   ('274','SOMERVILLE'),
-  ('275','SOUTH_HADL'),
+  ('275','SOUTHHADLEY'),
   ('276','SOUTHAMPTON'),
   ('277','SOUTHBOROUGH'),
   ('278','SOUTHBRIDGE'),
@@ -324,13 +324,13 @@ def convertMassGISTownNumbersToName( number) :
   ('318','WELLFLEET'),
   ('319','WENDELL'),
   ('320','WENHAM'),
-  ('321','WEST_BOYLSTON'),
-  ('322','WEST_BRIDGEWATER'),
-  ('323','WEST_BROOKFIELD'),
-  ('324','WEST_NEWBURY'),
-  ('325','WEST_SPRINGFIELD'),
-  ('326','WEST_STOCKBRIDGE'),
-  ('327','WEST_TISBURY'),
+  ('321','WESTBOYLSTON'),
+  ('322','WESTBRIDGEWATER'),
+  ('323','WESTBROOKFIELD'),
+  ('324','WESTNEWBURY'),
+  ('325','WESTSPRINGFIELD'),
+  ('326','WESTSTOCKBRIDGE'),
+  ('327','WESTTISBURY'),
   ('328','WESTBOROUGH'),
   ('329','WESTFIELD'),
   ('330','WESTFORD'),
@@ -363,18 +363,43 @@ def download():
   dirname = "massgis_parcels"
   if not os.path.exists(dirname):
     os.makedirs(dirname)
+  workedCount = 0
+  failedCount = 0
   for i in range(1,352):
     url = base + "%03d_%s.zip" % (i,convertMassGISTownNumbersToName(i))
     localname = "%s/%s.zip" % (dirname, convertMassGISTownNumbersToName(i))
-    print "downloading " + localname
     urllib.urlretrieve(url,localname)
     st=os.stat(localname)
     if st.st_size>0:
-      z=zipfile.ZipFile(localname,"r")
+      try:
+        z=zipfile.ZipFile(localname,"r")
+      except:
+        urllib.urlretrieve(url,localname)
+        z=zipfile.ZipFile(localname,"r")
+      workedCount += 1
+
       zl=z.namelist()
-      z.extractall(dirname)
+      for member in zl :
+       
+        # some of the zips have directories, some don't, we want to extract 
+        # them without embedded directories.
+        filename = os.path.basename(member)
+        # skip directories
+        if not filename:
+            continue
+
+        # copy file (taken from zipfile's extract)
+        source = z.open(member)
+        target = file(os.path.join(dirname, filename), "wb")
+        with source, target:
+            shutil.copyfileobj(source, target)
       z.close()
+    else:
+      print( "downloading " + localname + " Fail")
+      failedCount += 1
     os.remove(localname)
+
+  print(( "Worked %d, Failed %d, Total %d.") % (workedCount,failedCount,workedCount + failedCount))
 
 download()
 
