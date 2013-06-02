@@ -1,5 +1,6 @@
-import urllib,os,zipfile,glob
+# script to download updated L3 parcel data from the MassGIS website.
 
+import urllib,os,zipfile,glob
 
 def convertMassGISTownNumbersToName( number) :
 
@@ -369,8 +370,10 @@ def download():
     urllib.urlretrieve(url,localname)
     st=os.stat(localname)
     if st.st_size>0:
-      print "unzip " + localname
-      os.system(("unzip -d %s/ -j " % dirname) + localname);
+      z=zipfile.ZipFile(localname,"r")
+      zl=z.namelist()
+      z.extractall(dirname)
+      z.close()
     os.remove(localname)
 
 download()
